@@ -188,3 +188,4 @@ enum Severity {
    - User: Limited to their data and rankings.
 3. secure token storage and refresh mechanisms.
 
+![diagram](./docs/diagram.png)
