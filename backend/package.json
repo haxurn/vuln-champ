@@ -1,7 +1,7 @@
   {
     "name": "backend",
     "private": true,
-    "author": "Samson and Yeabkibir",
+    "author": "Haxurn",
     "version": "1.0.0",
     "main": "index.js",
     "type": "commonjs",
