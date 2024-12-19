@@ -1,26 +1,28 @@
-  {
+{
     "name": "backend",
     "private": true,
-    "author": "Haxurn",
+    "author": "Samson and Yeabkibir",
     "version": "1.0.0",
     "main": "index.js",
     "type": "commonjs",
     "scripts": {
-      "dev": "tsx index.ts",
-      "build": "tsc",
-      "start:prod": "node dict/index.js"
+        "dev": "tsx index.ts",
+        "build": "tsc",
+        "start:prod": "node dict/index.js"
     },
     "devDependencies": {
-      "@types/bun": "latest"
+        "@types/bun": "latest"
     },
     "peerDependencies": {
-      "typescript": "^5.7.2"
+        "typescript": "^5.7.2"
     },
     "dependencies": {
-      "@types/express": "^5.0.0",
-      "@types/node": "^22.10.2",
-      "dotenv": "16.4.7",
-      "express": "^4.21.2",
-      "ts-node": "^10.9.2"
+        "@prisma/client": "6.1.0",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.10.2",
+        "dotenv": "16.4.7",
+        "express": "^4.21.2",
+        "prisma": "^6.1.0",
+        "ts-node": "^10.9.2"
     }
-  }
+}
