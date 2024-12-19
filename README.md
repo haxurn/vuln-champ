@@ -189,3 +189,7 @@ enum Severity {
 3. secure token storage and refresh mechanisms.
 
 ![diagram](./docs/diagram.png)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
