@@ -180,7 +180,6 @@ enum Severity {
   high
 }
 ```
-
 ### 4. Authentication
 #### Steps:
 1. JWT authentication for secure authentication.
