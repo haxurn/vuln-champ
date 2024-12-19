@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id              String            @id @default(cuid())
+  name            String
+  email           String            @unique
+  points          Int               @default(0)
+  role            Role
+  badges          String[]
+  password        String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  vulnerabilities vulnerabilities[]
+  leaderboard     leaderboard[]
+  notification    notification[]
+  theme           theme[]
+}
+
+model vulnerabilities {
+  id               String   @id @default(cuid())
+  userId           String   @map("user_id")
+  user             users    @relation(fields: [userId], references: [id])
+  type             String
+  severity         Severity
+  date_found       DateTime
+  description      String
+  shortDescription String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model leaderboard {
+  id        String   @id @default(cuid())
+  weekStart DateTime
+  weekEnd   DateTime
+  userId    String   @map("user_id")
+  user      users    @relation(fields: [userId], references: [id])
+  rank      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model badge {
+  id             String   @id @default(cuid())
+  name           String
+  description    String
+  image          String
+  pointsRequired Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      users    @relation(fields: [userId], references: [id])
+  type      String
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model team_contributions {
+  id                   String   @id @default(cuid())
+  teamName             String
+  totalVulnerabilities Int
+  averageSeverity      Float
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model theme {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  user           users    @relation(fields: [userId], references: [id])
+  mode           String   @default("light")
+  customSettings Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum Severity {
+  low
+  medium
+  high
+}
