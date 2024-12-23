@@ -1,0 +1,163 @@
+{
+  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v10/terminal-keeper.json",
+  "theme": "tribe",
+  "active": "default",
+  "activateOnStartup": true,
+  "keepExistingTerminals": false,
+  "sessions": {
+    "default": [
+      {
+        "name": "package install",
+        "icon": "package",
+        "color": "terminal.ansiMagenta",
+        "commands": [
+        ]
+      },
+      {
+        "name": "run dev",
+        "icon": "rocket",
+        "color": "terminal.ansiGreen",
+        "commands": [
+        ]
+      },
+      {
+        "name": "backend dev",
+        "icon": "server",
+        "color": "terminal.ansiBlue",
+        "commands": [
+        ]
+      },
+      {
+        "name": "frontend",
+        "icon": "device-mobile",
+        "color": "terminal.ansiCyan",
+        "commands": [
+        ]
+      },
+      {
+        "name": "database",
+        "icon": "database",
+        "color": "terminal.ansiYellow",
+        "commands": [
+        ]
+      },
+      {
+        "name": "run tests",
+        "icon": "beaker",
+        "color": "terminal.ansiGreen",
+        "commands": [
+        ]
+      },
+      {
+        "name": "build",
+        "icon": "lightbulb",
+        "color": "terminal.ansiCyan",
+        "commands": [
+        ]
+      },
+      {
+        "name": "code linting",
+        "icon": "library",
+        "color": "terminal.ansiMagenta",
+        "commands": [
+        ]
+      },
+      {
+        "name": "logs",
+        "icon": "debug-breakpoint",
+        "color": "terminal.ansiRed",
+        "commands": [
+        ]
+      },
+      {
+        "name": "clear docker",
+        "icon": "trash",
+        "color": "terminal.ansiYellow",
+        "commands": [
+        ]
+      },
+      {
+        "name": "resources",
+        "icon": "repo",
+        "color": "terminal.ansiBlue",
+        "commands": [
+          "taskmgr"
+        ]
+      },
+      {
+        "name": "check",
+        "icon": "check",
+        "color": "terminal.ansiGreen",
+        "commands": [
+          "bun outdated"
+        ]
+      },
+      {
+        "name": "restart services",
+        "icon": "sync",
+        "color": "terminal.ansiYellow",
+        "commands": [
+        ]
+      },
+      {
+        "name": "api debugging",
+        "icon": "bug",
+        "color": "terminal.ansiRed",
+        "commands": [
+        ]
+      }
+    ],
+    "saved-session": [
+      {
+        "name": "git workflow",
+        "icon": "git-branch",
+        "color": "terminal.ansiBlue",
+        "commands": [
+          "git status"
+        ]
+      },
+      {
+        "name": "docker compose",
+        "icon": "layers",
+        "color": "terminal.ansiCyan",
+        "commands": [
+        ]
+      },
+      {
+        "name": "remote server",
+        "icon": "cloud",
+        "color": "terminal.ansiMagenta",
+        "commands": [
+        ]
+      },
+      {
+        "name": "expose local server",
+        "icon": "link",
+        "color": "terminal.ansiGreen",
+        "commands": [
+        ]
+      },
+      {
+        "name": "database migration",
+        "icon": "migration",
+        "color": "terminal.ansiYellow",
+        "commands": [
+        ]
+      },
+      {
+        "name": "unit tests",
+        "icon": "check",
+        "color": "terminal.ansiGreen",
+        "commands": [
+        ]
+      },
+      {
+        "name": "integration tests",
+        "icon": "merge",
+        "color": "terminal.ansiCyan",
+        "commands": [
+        ]
+      }
+    ]
+  }
+}
