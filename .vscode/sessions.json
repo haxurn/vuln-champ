@@ -7,21 +7,21 @@
   "sessions": {
     "default": [
       {
-        "name": "package install",
+        "name": "package",
         "icon": "package",
         "color": "terminal.ansiMagenta",
         "commands": [
         ]
       },
       {
-        "name": "run dev",
+        "name": "dev",
         "icon": "rocket",
         "color": "terminal.ansiGreen",
         "commands": [
         ]
       },
       {
-        "name": "backend dev",
+        "name": "backend",
         "icon": "server",
         "color": "terminal.ansiBlue",
         "commands": [
@@ -42,7 +42,7 @@
         ]
       },
       {
-        "name": "run tests",
+        "name": "tests",
         "icon": "beaker",
         "color": "terminal.ansiGreen",
         "commands": [
@@ -56,7 +56,7 @@
         ]
       },
       {
-        "name": "code linting",
+        "name": "linting",
         "icon": "library",
         "color": "terminal.ansiMagenta",
         "commands": [
@@ -70,7 +70,7 @@
         ]
       },
       {
-        "name": "clear docker",
+        "name": "clear",
         "icon": "trash",
         "color": "terminal.ansiYellow",
         "commands": [
@@ -93,14 +93,14 @@
         ]
       },
       {
-        "name": "restart services",
+        "name": "restart",
         "icon": "sync",
         "color": "terminal.ansiYellow",
         "commands": [
         ]
       },
       {
-        "name": "api debugging",
+        "name": "debugging",
         "icon": "bug",
         "color": "terminal.ansiRed",
         "commands": [
@@ -131,21 +131,21 @@
         ]
       },
       {
-        "name": "expose local server",
+        "name": "local server",
         "icon": "link",
         "color": "terminal.ansiGreen",
         "commands": [
         ]
       },
       {
-        "name": "database migration",
-        "icon": "migration",
+        "name": "migration",
+        "icon": "database",
         "color": "terminal.ansiYellow",
         "commands": [
         ]
       },
       {
-        "name": "unit tests",
+        "name": "tests",
         "icon": "check",
         "color": "terminal.ansiGreen",
         "commands": [
