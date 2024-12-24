@@ -418,38 +418,63 @@ paths:
   /user/create:
     post:
       summary: Create a new user
-      security:
-        - BearerAuth: []
       tags:
-        - Authentication
+        - Users
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                username:
-                  type: string
-                password:
-                  type: string
-                role:
-                  type: string
-                email:
-                  type: string
                 name:
                   type: string
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+                avatar:
+                  type: string
+                  format: binary
+                badges:
+                  type: array
+                  items:
+                    type: string
       responses:
         '201':
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  avatarUrl:
+                    type: string
         '400':
           description: Bad request
-        '500':
-          description: Server error
+        '409':
+          description: Conflict - User already exists
 
   /user/all:
     get:
@@ -509,32 +534,53 @@ paths:
       summary: Update user details by ID.
       tags:
         - Users
-      description: This route allows an authenticated user to update their own profile or an admin to update any user's profile.
-      operationId: updateUserById
-      security:
-        - BearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
+          description: ID of the user to update
           schema:
             type: string
-          description: The ID of the user to update.
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the user
+                username:
+                  type: string
+                  description: Username of the user
+                  minLength: 3
+                  maxLength: 30
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+                avatar:
+                  type: string
+                  format: binary
+                badges:
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
-          description: Successfully updated the user details.
-        '403':
-          description: Forbidden access, user cannot update another user’s details.
+          description: User updated successfully
+        '400':
+          description: Bad request
         '404':
-          $ref: '#/components/responses/NotFoundError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          description: User not found
 
   /user/delete/{id}:
     delete:
