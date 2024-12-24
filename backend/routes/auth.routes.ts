@@ -3,9 +3,7 @@ import authController from '../controllers/auth.controller'; // Import the contr
 
 const router = express.Router();
 
-/**
- * Route for refreshing the access token using the refresh token.
- */
-router.post('/refresh-token', authController.refreshToken);
+
+router.post('/token', authController.refreshToken);
 
 export default router;
