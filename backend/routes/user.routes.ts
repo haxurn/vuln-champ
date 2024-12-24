@@ -10,9 +10,9 @@ router.post('/create', userController.createUser);
 
 router.get('/get/:id', validateToken, userController.getUserById);
 
-router.get('/all', validateToken, checkAdminRole, userController.getAllUsers);
+router.get('/all', validateToken, validateToken, userController.getAllUsers);
 
-router.put('/update/:id', validateToken, userController.updateUserById);
+router.patch('/update/:id', validateToken, userController.updateUserById);
 
 router.delete('/delete/:id', validateToken, checkAdminRole, userController.deleteUserById);
 
