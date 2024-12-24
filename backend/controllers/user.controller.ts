@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
-import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils'; 
-import { successResponse, errorResponse } from '../utils/response.util'; 
+import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils';
+import { successResponse, errorResponse } from '../utils/response.util';
 import bcrypt from 'bcrypt';
+import { z } from 'zod';
+import { UpdateUserSchema } from '../schemas/user.schema';
 
 const createUser = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -33,10 +35,11 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
         errorResponse(res, error.message || 'An error occurred while creating the user');
     }
 };
+
 const getUserById = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.params.id;
-        console.log('Authenticated user ID:', req.user?.userId); 
+        console.log('Authenticated user ID:', req.user?.userId);
 
         const user = await userService.getUserById(userId);
         if (!user) {
@@ -56,28 +59,43 @@ const updateUserById = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.params.id;
         const updateData = req.body;
-        const loggedInUserId = req.user?.userId; 
+        const loggedInUserId = req.user?.userId;
 
+        // Authorization check: user can only update their own profile or need admin privileges
         if (loggedInUserId !== userId && req.user?.role !== 'admin') {
-             res.status(403).json({
+            res.status(403).json({
                 message: 'Forbidden: You can only update your own profile or you need admin privileges',
             });
             return;
         }
 
+        // Validate the incoming updateData using Zod
+        UpdateUserSchema.parse(updateData); // If invalid, it will throw an error
+
+        // Handle password hashing if present
+        if (updateData.password) {
+            const saltRounds = 10;
+            updateData.password = await bcrypt.hash(updateData.password, saltRounds);
+        }
+
+        // Call the service to update the user data
         const updatedUser = await userService.updateUserById(userId, updateData);
-        res.status(200).json({
+
+        successResponse(res, {
             message: 'User updated successfully',
             user: updatedUser,
-        });
+        }, 'User updated successfully');
     } catch (error: any) {
         console.error(error);
-        res.status(400).json({
-            message: error.message || 'An error occurred while updating the user',
-        });
+
+        // Handle Zod validation errors
+        if (error instanceof z.ZodError) {
+            errorResponse(res, `Validation failed: ${error.errors.map(e => e.message).join(', ')}`);
+        } else {
+            errorResponse(res, error.message || 'An error occurred while updating the user');
+        }
     }
 };
-
 
 const deleteUserById = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -126,7 +144,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
         }, 'Login successful');
     } catch (error: unknown) {
         console.error(error);
-  
+
         if (error instanceof Error) {
             errorResponse(res, error.message || 'An error occurred during login');
         } else {
