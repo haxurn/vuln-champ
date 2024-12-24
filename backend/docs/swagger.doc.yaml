@@ -28,23 +28,25 @@ components:
   schemas:
     User:
       type: object
-      required:
-        - username
-        - password
-        - role
       properties:
+        id:
+          type: string
+        name:
+          type: string
         username:
           type: string
-          description: User's username or email.
-          example: "johndoe"
-        password:
+        email:
           type: string
-          description: User's password.
-          example: "securePassword123"
         role:
           type: string
-          description: User's role (e.g., 'admin', 'user').
-          example: "user"
+        points:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     LoginResponse:
       type: object
@@ -92,6 +94,202 @@ components:
           description: The new access token after successful refresh.
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
+    Vulnerability:
+      type: object
+      required:
+        - type
+        - severity
+        - description
+        - shortDescription
+        - date_found
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the vulnerability
+          example: "cuid123"
+        userId:
+          type: string
+          description: ID of the user who reported the vulnerability
+          example: "user123"
+        type:
+          type: string
+          description: Type of vulnerability
+          example: "SQL Injection"
+        severity:
+          type: string
+          enum: [low, medium, high]
+          description: Severity level of the vulnerability
+          example: "high"
+        date_found:
+          type: string
+          format: date-time
+          description: Date when the vulnerability was found
+        description:
+          type: string
+          description: Detailed description of the vulnerability
+          example: "The login form is vulnerable to SQL injection attacks through the username field"
+        shortDescription:
+          type: string
+          description: Brief description of the vulnerability
+          example: "SQL injection in login form"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the record was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the record was last updated
+
+    VulnerabilityResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+        data:
+          $ref: '#/components/schemas/Vulnerability'
+
+    VulnerabilityListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vulnerability'
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total number of vulnerabilities
+            page:
+              type: integer
+              description: Current page number
+            limit:
+              type: integer
+              description: Number of items per page
+
+    Leaderboard:
+      type: object
+      properties:
+        id:
+          type: string
+        weekStart:
+          type: string
+          format: date-time
+        weekEnd:
+          type: string
+          format: date-time
+        userId:
+          type: string
+        rank:
+          type: integer
+        totalPoints:
+          type: integer
+        vulnerabilitiesFound:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    GeneralLeaderboard:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        totalPoints:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserPerformance:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        points:
+          type: integer
+        tasksCompleted:
+          type: integer
+        completedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+        content:
+          type: string
+        isGlobal:
+          type: boolean
+
+    Badge:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        pointsRequired:
+          type: integer
+        userId:
+          type: string
+
+    TeamContribution:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        contributorId:
+          type: string
+
+    Theme:
+      type: object
+      properties:
+        id:
+          type: string
+        mode:
+          type: string
+          enum:
+            - light
+            - dark
+            - system
+        customSettings:
+          type: object
+
   responses:
     UnauthorizedError:
       description: Unauthorized access, invalid or expired token.
@@ -130,6 +328,8 @@ paths:
   /user/login:
     post:
       summary: User login
+      tags:
+        - Authentication
       description: |
         This endpoint allows a user to log in by providing their username/email and password. 
         If authentication is successful, an access token and a refresh token are returned.
@@ -190,9 +390,11 @@ paths:
                     type: string
                     example: "An unexpected error occurred during login."
 
-  /auth/refresh-token:
+  /token/refresh:
     post:
       summary: Refresh the access token using the refresh token.
+      tags:
+        - Authentication
       description: This route allows a user to refresh their access token by providing a valid refresh token. This is required if the access token has expired.
       operationId: refreshToken
       requestBody:
@@ -215,32 +417,45 @@ paths:
 
   /user/create:
     post:
-      summary: Create a new user.
-      description: This route allows an admin to create a new user by providing necessary user details. The password will be encrypted before being stored in the database, and the user will be assigned a role.
-      operationId: createUser
+      summary: Create a new user
       security:
         - BearerAuth: []
+      tags:
+        - Authentication
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                email:
+                  type: string
+                name:
+                  type: string
       responses:
         '201':
-          description: Successfully created a new user with access and refresh tokens.
+          description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/User'
         '400':
-          description: Invalid input data.
-        '409':
-          description: Username or email already exists.
+          description: Bad request
+        '500':
+          description: Server error
 
   /user/all:
     get:
       summary: Get all users.
+      tags:
+        - Users
       description: This route allows an admin to fetch all users from the system.
       operationId: getAllUsers
       security:
@@ -264,6 +479,8 @@ paths:
   /user/get/{id}:
     get:
       summary: Get user details by ID.
+      tags:
+        - Users
       description: This route allows an authenticated user or admin to fetch the details of a user by their ID.
       operationId: getUserById
       security:
@@ -288,8 +505,10 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 
   /user/update/{id}:
-    put:
+    patch:
       summary: Update user details by ID.
+      tags:
+        - Users
       description: This route allows an authenticated user to update their own profile or an admin to update any user's profile.
       operationId: updateUserById
       security:
@@ -320,6 +539,8 @@ paths:
   /user/delete/{id}:
     delete:
       summary: Delete user by ID.
+      tags:
+        - Users
       description: This route allows an admin to delete a user by their ID.
       operationId: deleteUserById
       security:
@@ -340,3 +561,987 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
+  /vulnerabilities:
+    get:
+      summary: List all vulnerabilities
+      description: |
+        Retrieve vulnerabilities. Authentication required.
+        - Regular users can only see their own vulnerabilities
+        - Admin users can see all vulnerabilities
+      operationId: getVulnerabilities
+      tags:
+        - Vulnerabilities
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved vulnerabilities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vulnerabilities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vulnerability'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An error occurred"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User not authenticated
+
+    post:
+      summary: Create a new vulnerability
+      description: |
+        Create a new vulnerability entry. Authentication required.
+        The user ID will be automatically assigned from the authenticated user.
+      operationId: createVulnerability
+      tags:
+        - Vulnerabilities
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - severity
+                - date_found
+                - description
+                - shortDescription
+              properties:
+                type:
+                  type: string
+                  minLength: 1
+                  description: Type of vulnerability
+                  example: "SQL Injection"
+                severity:
+                  type: string
+                  enum: [low, medium, high]
+                  description: Severity level of the vulnerability
+                date_found:
+                  type: string
+                  format: date-time
+                  description: Date when the vulnerability was found
+                description:
+                  type: string
+                  minLength: 1
+                  description: Detailed description of the vulnerability
+                shortDescription:
+                  type: string
+                  minLength: 1
+                  description: Brief description of the vulnerability
+      responses:
+        '201':
+          description: Vulnerability created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Vulnerability created successfully"
+                  vulnerability:
+                    $ref: '#/components/schemas/Vulnerability'
+        '400':
+          description: Invalid inpatch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid severity level"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User not authenticated
+
+  /vulnerabilities/{id}:
+    get:
+      summary: Get vulnerability by ID
+      description: |
+        Retrieve a specific vulnerability. Authentication required.
+        - Regular users can only access their own vulnerabilities
+        - Admin users can access any vulnerability
+      operationId: getVulnerabilityById
+      tags:
+        - Vulnerabilities
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Vulnerability ID
+      responses:
+        '200':
+          description: Successfully retrieved vulnerability
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vulnerability:
+                    $ref: '#/components/schemas/Vulnerability'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User not authenticated or insufficient permissions
+        '404':
+          description: Vulnerability not found
+
+    patch:
+      summary: Update vulnerability
+      description: |
+        Update an existing vulnerability. Authentication required.
+        Admin role required.
+      operationId: updateVulnerability
+      tags:
+        - Vulnerabilities
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Vulnerability ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: Type of vulnerability
+                severity:
+                  type: string
+                  enum: [low, medium, high]
+                  description: Severity level of the vulnerability
+                description:
+                  type: string
+                  description: Detailed description of the vulnerability
+                shortDescription:
+                  type: string
+                  description: Brief description of the vulnerability
+      responses:
+        '200':
+          description: Vulnerability updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vulnerability:
+                    $ref: '#/components/schemas/Vulnerability'
+        '400':
+          description: Invalid inpatch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User not authenticated or not an admin
+        '404':
+          description: Vulnerability not found
+
+    delete:
+      summary: Delete vulnerability
+      description: |
+        Delete a vulnerability. Authentication required.
+        Admin role required.
+      operationId: deleteVulnerability
+      tags:
+        - Vulnerabilities
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Vulnerability ID
+      responses:
+        '200':
+          description: Vulnerability deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User not authenticated or not an admin
+        '404':
+          description: Vulnerability not found
+
+  /leaderboard:
+    post:
+      summary: Create a new leaderboard entry
+      security:
+        - BearerAuth: []
+      tags:
+        - Leaderboard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weekStart:
+                  type: string
+                  format: date-time
+                weekEnd:
+                  type: string
+                  format: date-time
+                userId:
+                  type: string
+                rank:
+                  type: integer
+                totalPoints:
+                  type: integer
+                vulnerabilitiesFound:
+                  type: integer
+      responses:
+        '201':
+          description: Leaderboard entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Leaderboard'
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+    get:
+      summary: Get leaderboard entries for a specific week
+      security:
+        - BearerAuth: []
+      tags:
+        - Leaderboard
+      parameters:
+        - name: weekStart
+          in: query
+          required: true
+          description: Start date of the week
+          schema:
+            type: string
+            format: date-time
+        - name: weekEnd
+          in: query
+          required: true
+          description: End date of the week
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: A list of leaderboard entries for the week
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Leaderboard'
+        '400':
+          description: Missing weekStart or weekEnd
+        '500':
+          description: Server error
+
+  /general:
+    post:
+      summary: Create a new general leaderboard entry
+      security:
+        - BearerAuth: []
+      tags:
+        - General Leaderboard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                totalPoints:
+                  type: integer
+      responses:
+        '201':
+          description: General leaderboard entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralLeaderboard'
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+    get:
+      summary: Get all general leaderboard entries
+      security:
+        - BearerAuth: []
+      tags:
+        - General Leaderboard
+      responses:
+        '200':
+          description: A list of general leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeneralLeaderboard'
+        '500':
+          description: Server error
+
+  /performance:
+    post:
+      summary: Create a new user performance record
+      security:
+        - BearerAuth: []
+      tags:
+        - User Performance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                points:
+                  type: integer
+                tasksCompleted:
+                  type: integer
+                completedAt:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: User performance record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPerformance'
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+    get:
+      summary: Get performance records for a user
+      security:
+        - BearerAuth: []
+      tags:
+        - User Performance
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User performance records retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserPerformance'
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+  /notifications:
+    post:
+      summary: Create a new notification
+      security:
+        - BearerAuth: []
+      tags:
+        - Notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                type:
+                  type: string
+                content:
+                  type: string
+                isGlobal:
+                  type: boolean
+      responses:
+        '201':
+          description: Notification created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  userId:
+                    type: string
+                  type:
+                    type: string
+                  content:
+                    type: string
+                  isGlobal:
+                    type: boolean
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /notifications/{userId}:
+    get:
+      summary: Get notifications for a user
+      security:
+        - BearerAuth: []
+      tags:
+        - Notifications
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    userId:
+                      type: string
+                    type:
+                      type: string
+                    content:
+                      type: string
+                    isGlobal:
+                      type: boolean
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+  /notifications/{notificationId}/mark-as-read:
+    patch:
+      summary: Mark a notification as read
+      security:
+        - BearerAuth: []
+      tags:
+        - Notifications
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          description: ID of the notification
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification marked as read successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  userId:
+                    type: string
+                  type:
+                    type: string
+                  content:
+                    type: string
+                  isGlobal:
+                    type: boolean
+        '404':
+          description: Notification not found
+        '500':
+          description: Server error
+
+  /badges:
+    post:
+      summary: Create a new badge
+      security:
+        - BearerAuth: []
+      tags:
+        - Badges
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                pointsRequired:
+                  type: integer
+                userId:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Badge created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  pointsRequired:
+                    type: integer
+                  userId:
+                    type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /badges/user/{userId}:
+    get:
+      summary: Get badges by user ID
+      security:
+        - BearerAuth: []
+      tags:
+        - Badges
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Badges retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    pointsRequired:
+                      type: integer
+                    userId:
+                      type: string
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+  /badges/{id}:
+    delete:
+      summary: Delete a badge by ID
+      security:
+        - BearerAuth: []
+      tags:
+        - Badges
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the badge
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Badge deleted successfully
+        '404':
+          description: Badge not found
+        '500':
+          description: Server error
+
+    patch:
+      summary: Update an existing badge
+      security:
+        - BearerAuth: []
+      tags:
+        - Badges
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the badge to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                pointsRequired:
+                  type: integer
+                userId:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Badge updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  pointsRequired:
+                    type: integer
+                  userId:
+                    type: string
+        '400':
+          description: Bad request
+        '404':
+          description: Badge not found
+        '500':
+          description: Server error
+
+  /team:
+    post:
+      summary: Create a new team contribution
+      security:
+        - BearerAuth: []
+      tags:
+        - Team Contributions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                contributorId:
+                  type: string
+      responses:
+        '201':
+          description: Team contribution created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  contributorId:
+                    type: string
+        '400':
+          description: Bad request
+
+    get:
+      summary: Get all team contributions
+      security:
+        - BearerAuth: []
+      tags:
+        - Team Contributions
+      responses:
+        '200':
+          description: List of team contributions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    contributorId:
+                      type: string
+
+  /team/{id}:
+    get:
+      summary: Get a team contribution by ID
+      security:
+        - BearerAuth: []
+      tags:
+        - Team Contributions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the team contribution
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team contribution found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  contributorId:
+                    type: string
+        '404':
+          description: Team contribution not found
+
+    patch:
+      summary: Update a team contribution
+      security:
+        - BearerAuth: []
+      tags:
+        - Team Contributions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the team contribution
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Team contribution updated successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Team contribution not found
+
+    delete:
+      summary: Delete a team contribution
+      security:
+        - BearerAuth: []
+      tags:
+        - Team Contributions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the team contribution
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team contribution deleted successfully
+        '404':
+          description: Team contribution not found
+
+  /theme:
+    post:
+      summary: Create a new theme
+      security:
+        - BearerAuth: []
+      tags:
+        - Themes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum:
+                    - light
+                    - dark
+                    - system
+                customSettings:
+                  type: object
+      responses:
+        '201':
+          description: Theme created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  mode:
+                    type: string
+                    enum:
+                      - light
+                      - dark
+                      - system
+                  customSettings:
+                    type: object
+        '400':
+          description: Bad request
+
+  /theme/{userId}:
+    patch:
+      summary: Update theme for a user
+      security:
+        - BearerAuth: []
+      tags:
+        - Themes
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum:
+                    - light
+                    - dark
+                    - system
+                customSettings:
+                  type: object
+      responses:
+        '200':
+          description: Theme updated successfully
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+
+    get:
+      summary: Get theme by user ID
+      security:
+        - BearerAuth: []
+      tags:
+        - Themes
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Theme found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  mode:
+                    type: string
+                  customSettings:
+                    type: object
+        '404':
+          description: Theme not found
