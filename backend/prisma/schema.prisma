@@ -15,6 +15,7 @@ model User {
   email              String               @unique
   password           String
   points             Int                  @default(0)
+  avatar             String?
   role               Role
   badges             Badge[]              @relation("UserBadges") // Add the reverse relation name here
   createdAt          DateTime             @default(now())
