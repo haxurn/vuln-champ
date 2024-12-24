@@ -13,17 +13,23 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        const userData = { username, password: hashedPassword, role, email, name };
+    
+        let avatarUrl = '';
+        if (req.file) {
+            avatarUrl = `/backend/uploads/avatars/${req.file.filename}`; 
+        }
+
+        const userData = { username, password: hashedPassword, role, email, name, avatarUrl };
         const newUser = await userService.createUser(userData);
 
         const accessToken = generateAccessToken(newUser.id, newUser.role, newUser.username);
         const refreshToken = generateRefreshToken(newUser.id);
-
         successResponse(res, {
             user: {
                 id: newUser.id,
                 username: newUser.username,
                 role: newUser.role,
+                avatarUrl: newUser.avatar,  
             },
             tokens: {
                 accessToken,
@@ -55,13 +61,13 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+
 const updateUserById = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.params.id;
         const updateData = req.body;
         const loggedInUserId = req.user?.userId;
 
-        // Authorization check: user can only update their own profile or need admin privileges
         if (loggedInUserId !== userId && req.user?.role !== 'admin') {
             res.status(403).json({
                 message: 'Forbidden: You can only update your own profile or you need admin privileges',
@@ -69,16 +75,17 @@ const updateUserById = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Validate the incoming updateData using Zod
-        UpdateUserSchema.parse(updateData); // If invalid, it will throw an error
+        UpdateUserSchema.parse(updateData); 
 
-        // Handle password hashing if present
         if (updateData.password) {
             const saltRounds = 10;
             updateData.password = await bcrypt.hash(updateData.password, saltRounds);
         }
 
-        // Call the service to update the user data
+        if (req.file) {
+            updateData.avatarUrl = `/backend/uploads/avatars/${req.file.filename}`;
+        }
+
         const updatedUser = await userService.updateUserById(userId, updateData);
 
         successResponse(res, {
@@ -88,7 +95,6 @@ const updateUserById = async (req: Request, res: Response): Promise<void> => {
     } catch (error: any) {
         console.error(error);
 
-        // Handle Zod validation errors
         if (error instanceof z.ZodError) {
             errorResponse(res, `Validation failed: ${error.errors.map(e => e.message).join(', ')}`);
         } else {
@@ -122,6 +128,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+
 const loginUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const { identifier, password } = req.body;
@@ -136,6 +143,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
                 id: user.id,
                 username: user.username,
                 role: user.role,
+                avatarUrl: user.avatar,  
             },
             tokens: {
                 accessToken,
