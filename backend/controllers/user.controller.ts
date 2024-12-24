@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
-import { generateAccessToken, generateRefreshToken } from '../utils/auth.utils'; 
+import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils'; 
 import { successResponse, errorResponse } from '../utils/response.util'; 
 import bcrypt from 'bcrypt';
 

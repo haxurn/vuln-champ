@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { verifyRefreshToken, generateAccessToken } from '../utils/auth.utils'; // Import your utility functions
+import { verifyRefreshToken, generateAccessToken } from '../utils/jwt.utils'; // Import your utility functions
 
 export const validateToken = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.header('Authorization')?.replace('Bearer ', '');

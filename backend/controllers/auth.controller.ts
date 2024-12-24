@@ -1,7 +1,7 @@
 // backend/controllers/auth.controller.ts
 
 import { Request, Response } from 'express';
-import { verifyRefreshToken, generateAccessToken } from '../utils/auth.utils';
+import { verifyRefreshToken, generateAccessToken } from '../utils/jwt.utils';
 
 const refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
