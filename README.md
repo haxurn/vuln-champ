@@ -92,94 +92,7 @@ The VulnChamp highlights the best workers of the weekend based on the vulnerabil
 ### 3. Database
 #### Steps:
 1. `PostgreSQL` for the database.
-2. Database schema using `Prisma ORM`:
-```prisma
-model users {
-  id          String   @id @default(cuid())
-  name        String
-  email       String   @unique
-  points      Int      @default(0)
-  role        Role
-  badges      String[]
-  password    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model vulnerabilities {
-  id                String   @id @default(cuid())
-  userId            String   @map("user_id")
-  user              users    @relation(fields: [userId], references: [id])
-  type              String
-  severity          Severity
-  date_found        DateTime
-  description       String
-  shortDescription  String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
-model leaderboard {
-  id          String   @id @default(cuid())
-  weekStart   DateTime
-  weekEnd     DateTime
-  userId      String   @map("user_id")
-  user        users    @relation(fields: [userId], references: [id])
-  rank        Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model badge {
-  id            String   @id @default(cuid())
-  name          String
-  description   String
-  image         String
-  pointsRequired Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model notification {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  user      users    @relation(fields: [userId], references: [id])
-  type      String
-  content   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
-}
-
-model team_contributions {
-  id                String   @id @default(cuid())
-  teamName          String
-  totalVulnerabilities Int
-  averageSeverity   Float
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
-model theme {
-  id             String   @id @default(cuid())
-  userId         String   @map("user_id")
-  user           users    @relation(fields: [userId], references: [id])
-  mode           String   @default("light")
-  customSettings Json
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-enum Role {
-  admin
-  user
-}
-
-enum Severity {
-  low
-  medium
-  high
-}
-```
+2. Database schema using `Prisma ORM`
 ### 4. Authentication
 #### Steps:
 1. JWT authentication for secure authentication.
@@ -188,7 +101,7 @@ enum Severity {
    - User: Limited to their data and rankings.
 3. secure token storage and refresh mechanisms.
 
-![diagram](./assets/diagram.png)
+![diagram](./docs/diagram.png)
 
 ## License
 
