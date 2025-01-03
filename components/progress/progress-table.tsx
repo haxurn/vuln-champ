@@ -32,7 +32,7 @@ const progressData: ProgressEntry[] = [
 ];
 
 const typeColors = {
-  vulnerability: 'default',
+  vulnerability: 'destructive',
   badge: 'secondary',
   streak: 'outline',
 } as const;
