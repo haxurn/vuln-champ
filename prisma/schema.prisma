@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Session {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   expiresAt DateTime
   token     String
   createdAt DateTime
@@ -22,48 +22,53 @@ model Session {
   ipAddress String?
   userAgent String?
   userId    String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@map("session")
 }
 
 model User {
-  id        String @id
-  name      String
-  email     String
-  emailVerified Boolean
-  image     String?
-  createdAt DateTime 
-  updatedAt DateTime
-  sessions  Session[]
-  accounts  Account[]
+  id              String          @id
+  name            String
+  email           String
+  emailVerified   Boolean
+  image           String?
+  createdAt       DateTime
+  updatedAt       DateTime
+  role            Role?
+  sessions        Session[]
+  accounts        Account[]
+  vulnerabilities Vulnerability[] @relation("VulnerabilityReportedBy")
+  badges          Badge[]
+  leaderboard     Leaderboard[]
+  progress        Progress[]
 
   @@unique([email])
   @@map("user")
 }
 
 model Account {
-  id         String  @id
-  accountId  String
-  providerId String
-  userId     String
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken String?
-  refreshToken String?
-  idToken     String?
+  id                   String    @id
+  accountId            String
+  providerId           String
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken          String?
+  refreshToken         String?
+  idToken              String?
   accessTokenExpiresAt DateTime?
   refreshTokenExiresAt DateTime?
-  scope String?
-  password String?
-  createdAt DateTime
-  updatedAt DateTime
+  scope                String?
+  password             String?
+  createdAt            DateTime
+  updatedAt            DateTime
 
   @@map("account")
 }
 
 model Verification {
-  id         String   @id 
+  id         String   @id
   identifier String
   value      String
   expiresAt  DateTime
@@ -71,4 +76,76 @@ model Verification {
   updatedAt  DateTime
 
   @@map("verification")
+}
+
+enum Severity {
+  low
+  medium
+  high
+}
+
+model Vulnerability {
+  id           String   @id
+  title        String
+  description  String
+  severity     Severity
+  reportedBy   User     @relation("VulnerabilityReportedBy", fields: [reportedById], references: [id], onDelete: Cascade)
+  reportedById String
+  reportedAt   DateTime
+  status       Status
+
+  @@map("vulnerability")
+}
+
+model Badge {
+  id               String   @id
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  badgeName        String
+  points           Int
+  badgeDescription String
+  createdAt        DateTime
+  earnedAt         DateTime
+  updatedAt        DateTime
+  image            String
+
+  @@map("badge")
+}
+
+model Leaderboard {
+  id            String   @id
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  points        Int
+  weekStartDate DateTime
+  weekEndDate   DateTime
+  createdAt     DateTime
+  updatedAt     DateTime
+  rank          Int
+
+  @@map("leaderboard")
+}
+
+model Progress {
+  id                   String    @id
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String
+  weekStart            DateTime
+  weekEnd              DateTime
+  totalVulnerabilities Int
+  totalPoints          Int
+  streak               Int
+  lastActivity         DateTime?
+
+  @@map("progress")
+}
+
+enum Status {
+  open
+  closed
+}
+
+enum Role {
+  admin
+  user
 }
